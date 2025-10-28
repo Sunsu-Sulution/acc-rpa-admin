@@ -16,7 +16,7 @@ export default function Page() {
       return;
     }
     setItem("user_info", JSON.stringify(response));
-    window.location.href = "/";
+    window.location.href = "/dashboard";
   };
 
   useEffect(() => {

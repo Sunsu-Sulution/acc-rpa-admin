@@ -17,6 +17,11 @@ import { useFullLoadingContext } from "./full-loading-provider";
 import { getItem } from "@/lib/storage";
 import { GetUserInfoResponse } from "@/types/lark";
 
+interface HeaderContextType {
+  title: string;
+  setTitle: (title: string) => void;
+}
+
 interface HelperContextType {
   setAlert: ReturnType<typeof useAlertContext>;
   setFullLoading: (value: boolean, useDino?: boolean) => boolean;
@@ -24,6 +29,7 @@ interface HelperContextType {
   router: ReturnType<typeof useRouter>;
   userInfo: GetUserInfoResponse | undefined;
   setUserInfo: Dispatch<SetStateAction<GetUserInfoResponse | undefined>>;
+  header: HeaderContextType;
 }
 
 const HelperContext = createContext<() => HelperContextType>(() => {
@@ -54,6 +60,10 @@ const HelperContext = createContext<() => HelperContextType>(() => {
     setUserInfo: (() => undefined) as Dispatch<
       SetStateAction<GetUserInfoResponse | undefined>
     >,
+    header: {
+      title: "",
+      setTitle: () => {},
+    },
   };
 });
 
@@ -61,6 +71,7 @@ export function HelperProvider({ children }: { children: ReactNode }) {
   const setAlert = useAlertContext();
   const setFullLoading = useFullLoadingContext();
   const router = useRouter();
+  const [title, setTitle] = useState<string>("");
 
   const [userInfo, setUserInfo] = useState<GetUserInfoResponse | undefined>(
     () => {
@@ -79,7 +90,7 @@ export function HelperProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!userInfo) {
-      router.push("/login");
+      router.push("/");
     }
   }, [userInfo, router]);
 
@@ -91,8 +102,12 @@ export function HelperProvider({ children }: { children: ReactNode }) {
       router,
       userInfo,
       setUserInfo,
+      header: {
+        title,
+        setTitle,
+      },
     }),
-    [setAlert, setFullLoading, router, userInfo],
+    [setAlert, setFullLoading, router, userInfo, title],
   );
 
   return (

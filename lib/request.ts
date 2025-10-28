@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ErrorResponse, GetUserInfoResponse } from "@/types/lark";
+import { removeItem } from "./storage";
 
 const handlerError = (
     error: unknown,
@@ -25,7 +26,7 @@ const handlerError = (
                 };
             }
             setAlert("เกิดข้อผิดพลาด", responseData.msg || "Error", () => {
-                window.location.href = "/login"
+                window.location.href = "/"
             }, false);
             return {
                 code: error.response.status || 400,
@@ -34,7 +35,7 @@ const handlerError = (
             };
         } else {
             setAlert("เกิดข้อผิดพลาด", error.message, () => {
-                window.location.href = "/login"
+                window.location.href = "/"
             }, false);
             return {
                 code: 9999,
@@ -74,29 +75,19 @@ export class BackendClient {
         this.setAlert = setAlert;
     }
 
-    private async retryWithDelay<T>(
-        requestFn: () => Promise<T>,
-        maxRetries: number = 3
-    ): Promise<T> {
-        for (let attempt = 0; attempt < maxRetries; attempt++) {
-            try {
-                return await requestFn();
-            } catch (error) {
-                const errorResponse = handlerError(error, this.setAlert);
-                if (errorResponse.code === 99991400 && attempt < maxRetries - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    continue;
-                }
-                throw errorResponse;
-            }
-        }
-        throw { code: 9999, msg: "Max retries exceeded", error: true };
-    }
-
     getAccessToken = async (code: string): Promise<GetUserInfoResponse | ErrorResponse> => {
         try {
             const response = await axios.get(`/api/authorization?code=${code}`)
             return response.data
+        } catch (e) {
+            return handlerError(e, this.setAlert)
+        }
+    }
+
+    logout = () => {
+        try {
+            removeItem("user_info");
+            window.location.href = "/";
         } catch (e) {
             return handlerError(e, this.setAlert)
         }
