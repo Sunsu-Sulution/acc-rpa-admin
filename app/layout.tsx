@@ -1,19 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Kanit } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import { AlertDialogProvider } from "@/components/providers/alert-provider";
 import { FullLoadingProvider } from "@/components/providers/full-loading-provider";
 import { HelperProvider } from "@/components/providers/helper-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const kanit = Kanit({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-kanit-sans",
+  weight: "300",
 });
 
 export const metadata: Metadata = {
@@ -29,9 +25,7 @@ export default function RootLayout({
   return (
     <Suspense fallback={<div></div>}>
       <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+        <body className={`${kanit.variable} antialiased`}>
           <AlertDialogProvider>
             <FullLoadingProvider>
               <HelperProvider>{children}</HelperProvider>

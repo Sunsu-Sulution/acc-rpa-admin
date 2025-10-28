@@ -26,7 +26,7 @@ interface DataTableProps<T> {
   fetchData: (
     limit: number,
     offset: number | "",
-    filter: string,
+    filter: string | "",
   ) => Promise<PaginatedResponse<T> | ErrorResponse>;
   columns?: Array<{ key: keyof T; label: string }>;
   href?: string;
@@ -123,7 +123,7 @@ export function DataTable<T>({
 
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center py-4">
+      <div className="flex justify-between items-center pb-4">
         {!hideSearch ? (
           <Input
             placeholder="ค้นหา"
@@ -174,7 +174,7 @@ export function DataTable<T>({
           <TableHeader>
             <TableRow>
               {columnNames.map(({ label }) => (
-                <TableHead key={label}>{label}</TableHead>
+                <TableHead className="font-bold" key={label}>{label}</TableHead>
               ))}
             </TableRow>
           </TableHeader>

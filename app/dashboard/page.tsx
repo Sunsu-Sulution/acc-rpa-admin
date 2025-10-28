@@ -7,6 +7,7 @@ import { getSupabaseServiceClient } from "@/lib/database";
 import { ErrorResponse, PaginatedResponse } from "@/types/lark";
 import { BranchMapping } from "@/types/database";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const { header, setAlert, setFullLoading } = useHelperContext()();
@@ -63,7 +64,6 @@ export default function Home() {
       );
     }
 
-    // Group data by shop_br and create summary
     const groupedData = filteredData.reduce((groups, item) => {
       const shopBr = item.shop_br || "Unknown";
       if (!groups[shopBr]) {
@@ -85,25 +85,16 @@ export default function Home() {
         return {
           ...firstItem,
           shop: uniqueShops.join(", "),
-          // line_edc: uniqueLineEdc.join(", "),
           shop_br: shopBr,
         };
       },
     );
 
-    // Sort by shop_br
     summaryData.sort((a, b) => {
       const shopBrA = a.shop_br || "";
       const shopBrB = b.shop_br || "";
       return shopBrA.localeCompare(shopBrB);
     });
-
-    if (!filter && offset === "") {
-      return {
-        datas: summaryData,
-        next: -1,
-      };
-    }
 
     const startIndex = offset === "" ? 0 : offset;
     const endIndex = startIndex + limit;
@@ -119,7 +110,16 @@ export default function Home() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold">Branch Mapping</h1>
+      <div className="flex justify-between item-center">
+        <h1 className="text-2xl font-bold">Branch Mapping</h1>
+        <Button
+          onClick={() => {
+            window.location.href = "/dashboard/shop/create";
+          }}
+        >
+          สร้าง Mapping ใหม่
+        </Button>
+      </div>
       {isDataLoaded && (
         <DataTable
           fetchData={fetchBranch}

@@ -246,9 +246,9 @@ export function FullLoadingProvider({
   useDinoGame?: boolean;
 }) {
   const [loading, setLoading] = useState<boolean>(false);
-  const [useDino, setUseDino] = useState(false);
+  const [useDino, setUseDino] = useState(true);
 
-  const onChangeLoading = useCallback((value: boolean, useDino = false) => {
+  const onChangeLoading = useCallback((value: boolean, useDino = true) => {
     setLoading(value);
     setUseDino(useDino);
     return value;
