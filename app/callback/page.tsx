@@ -2,7 +2,7 @@
 "use client";
 import { useHelperContext } from "@/components/providers/helper-provider";
 import { isErrorResponse } from "@/types/lark";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { setItem } from "@/lib/storage";
 

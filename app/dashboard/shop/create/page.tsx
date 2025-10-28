@@ -4,12 +4,12 @@ import { useHelperContext } from "@/components/providers/helper-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getSupabaseServiceClient } from "@/lib/database";
-import React, { FormEvent, useEffect, useRef } from "react";
+import { addActivityLogs, getSupabaseServiceClient } from "@/lib/database";
+import { FormEvent, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 export default function Page() {
-  const { header, setFullLoading, setAlert } = useHelperContext()();
+  const { header, setFullLoading, setAlert, userInfo } = useHelperContext()();
   const formRef = useRef<HTMLFormElement | null>(null);
   const searchParams = useSearchParams();
 
@@ -80,6 +80,7 @@ export default function Page() {
       setFullLoading(false);
     }
 
+    await addActivityLogs(`${userInfo?.email} ได้ทำการสร้าง Mapping ${shopName}(${shopBR})\n- grab: ${grab}\n- shopeefood: ${shopeefood}\n- lineman: ${lineman}\n- lineman: ${lineman}`, "mapping", shopBR);
     window.location.href = `/dashboard/shop/${shopBR}`;
   };
 
