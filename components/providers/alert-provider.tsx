@@ -50,7 +50,7 @@ export function AlertDialogComponent({
           )}
           {typeof action !== "undefined" && (
             <AlertDialogAction onClick={handleActionClick}>
-              ตกลก
+              ตกลง
             </AlertDialogAction>
           )}
         </AlertDialogFooter>
