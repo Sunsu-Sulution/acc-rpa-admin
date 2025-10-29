@@ -1,11 +1,13 @@
+/* eslint-disable react/no-string-refs */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
+import ActivityLog from "@/components/activity-log";
 import { DataTable } from "@/components/datatable/datatable";
 import { useHelperContext } from "@/components/providers/helper-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getSupabaseServiceClient } from "@/lib/database";
+import { addActivityLogs, getSupabaseServiceClient } from "@/lib/database";
 import { BranchMapping } from "@/types/database";
 import { ErrorResponse, PaginatedResponse } from "@/types/lark";
 import { FormEvent, use, useEffect, useRef, useState } from "react";
@@ -16,10 +18,11 @@ type PageProps = {
 
 export default function Page({ params }: PageProps) {
   const { shopId } = use(params);
-  const { header, setAlert, setFullLoading } = useHelperContext()();
+  const { header, setAlert, setFullLoading, userInfo } = useHelperContext()();
   const [allBranchData, setAllBranchData] = useState<BranchMapping[]>([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [shopName, setShopName] = useState("");
+  const [oldShopName, setOldShopName] = useState("");
   const [shopBR, setShopBR] = useState(shopId);
   const formRef = useRef<HTMLFormElement | null>(null);
 
@@ -50,6 +53,7 @@ export default function Page({ params }: PageProps) {
     }
 
     setShopName(data[0].shop);
+    setOldShopName(data[0].shop);
     setAllBranchData(data || []);
     setIsDataLoaded(true);
     setFullLoading(false);
@@ -113,12 +117,20 @@ export default function Page({ params }: PageProps) {
         return;
       }
 
+      if (oldShopName != shopName) {
+        await addActivityLogs(
+          `${userInfo?.email} ได้ทำการอัพเดท Shop name\n- ${oldShopName} -> ${shopName}`,
+          "mapping",
+          shopBR,
+        );
+      }
+
       setAlert(
         "Success",
         "อัปเดตสำเร็จ",
         () => {
           if (shopBR !== shopId) {
-            window.location.href = `/dashboard/shop/${shopBR}`;
+            window.location.reload();
           } else {
             fetchAllBranchData();
           }
@@ -133,7 +145,7 @@ export default function Page({ params }: PageProps) {
   return (
     <form ref={formRef} onSubmit={onSubmit} className="container mx-auto p-6">
       <div className="flex justify-between item-center">
-        <div className="text-2xl font-bold">{shopName}</div>
+        <div className="text-2xl font-bold">{oldShopName}</div>
         <Button type="submit">บันทึก</Button>
       </div>
       <div className="bg-white rounded-3xl shadow-md p-5">
@@ -188,6 +200,7 @@ export default function Page({ params }: PageProps) {
           </Button>
         </div>
       </div>
+      <ActivityLog ref="mapping" refId={shopId} />
     </form>
   );
 }
