@@ -57,7 +57,7 @@ export default function ActivityLog({ ref, refId }: ActivityLogProps) {
       <div className="text-xl font-bold mb-4">Activity Log</div>
       <div className="w-full h-64 p-3 border border-gray-300 rounded-lg overflow-auto font-mono text-sm bg-gray-50">
         {activityLogs.length === 0 ? (
-          <div className="text-gray-500">No activity logs found...</div>
+          <div className="text-gray-500">No activity logs found</div>
         ) : (
           activityLogs.map((log) => {
             const date = new Date(log.created_at).toLocaleString();

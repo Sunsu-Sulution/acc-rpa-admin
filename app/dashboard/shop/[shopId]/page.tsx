@@ -253,6 +253,7 @@ export default function Page({ params }: PageProps) {
           <DataTable<RowType>
             fetchData={fetchBranch}
             columns={[
+              { key: "line_edc", label: "Line EDC" },
               { key: "grab", label: "Grab" },
               { key: "lineman", label: "Lineman" },
               { key: "robinhood", label: "Robinhood" },

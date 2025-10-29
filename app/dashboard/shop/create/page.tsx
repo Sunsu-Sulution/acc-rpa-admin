@@ -80,7 +80,11 @@ export default function Page() {
       setFullLoading(false);
     }
 
-    await addActivityLogs(`${userInfo?.email} ได้ทำการสร้าง Mapping ${shopName}(${shopBR})\n- <b>grab:</b> ${grab}\n- <b>shopeefood:</b> ${shopeefood}\n- <b>lineman</b>: ${lineman}\n- <b>lineman:</b> ${lineman}`, "mapping", shopBR);
+    await addActivityLogs(
+      `${userInfo?.email} ได้ทำการสร้าง Mapping ${shopName}(${shopBR})\n- <b>line edc:</b> ${lineEDC}\n- <b>grab:</b> ${grab}\n- <b>shopeefood:</b> ${shopeefood}\n- <b>lineman</b>: ${lineman}\n- <b>lineman:</b> ${lineman}`,
+      "mapping",
+      shopBR,
+    );
     window.location.href = `/dashboard/shop/${shopBR}`;
   };
 
