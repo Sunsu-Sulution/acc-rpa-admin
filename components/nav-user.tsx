@@ -3,15 +3,12 @@
 import {
   IconDotsVertical,
   IconLogout,
-  IconNotification,
-  IconUserCircle,
 } from "@tabler/icons-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -28,7 +25,7 @@ import { isErrorResponse } from "@/types/lark";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-  const { userInfo, router, backendClient, setAlert, setFullLoading } =
+  const { userInfo, backendClient, setAlert, setFullLoading } =
     useHelperContext()();
 
   const onLogout = async () => {
@@ -63,8 +60,8 @@ export function NavUser() {
                 />
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{userInfo?.name}</span>
-                <span className="text-muted-foreground truncate text-xs">
+                <span suppressHydrationWarning className="truncate font-medium">{userInfo?.name || ""}</span>
+                <span suppressHydrationWarning className="text-muted-foreground truncate text-xs">
                   {userInfo?.email}
                 </span>
               </div>
@@ -86,7 +83,7 @@ export function NavUser() {
                   />
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{userInfo?.name}</span>
+                  <span className="truncate font-medium">{userInfo?.name || ""}</span>
                   <span className="text-muted-foreground truncate text-xs">
                     {userInfo?.email}
                   </span>
