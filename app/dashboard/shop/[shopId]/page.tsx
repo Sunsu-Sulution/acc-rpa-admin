@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { addActivityLogs, getSupabaseServiceClient } from "@/lib/database";
 import { BranchMapping } from "@/types/database";
 import { ErrorResponse, PaginatedResponse } from "@/types/lark";
-import { FormEvent, use, useEffect, useRef, useState } from "react";
+import { IconTrashFilled } from "@tabler/icons-react";
+import { FormEvent, ReactNode, use, useEffect, useRef, useState } from "react";
 
 type PageProps = {
   params: Promise<{ shopId: string }>;
@@ -25,6 +26,8 @@ export default function Page({ params }: PageProps) {
   const [oldShopName, setOldShopName] = useState("");
   const [shopBR, setShopBR] = useState(shopId);
   const formRef = useRef<HTMLFormElement | null>(null);
+
+  type RowType = BranchMapping & { action: ReactNode };
 
   const fetchAllBranchData = async () => {
     setFullLoading(true);
@@ -59,14 +62,86 @@ export default function Page({ params }: PageProps) {
     setFullLoading(false);
   };
 
+  const handleDelete = async (mapping: BranchMapping) => {
+    if (allBranchData.length <= 1) {
+      setAlert(
+        "Error",
+        "ต้องมีอย่างน้อย 1 mapping ไม่สามารถลบอันสุดท้ายได้",
+        () => {},
+        false,
+      );
+      return;
+    }
+
+    setAlert(
+      "คุณต้องการลบ mapping นี้ใช่หรือไม่",
+      "กรุณายืนยันก่อนทำการลบ",
+      async () => {
+        setFullLoading(true);
+        try {
+          const supabase = getSupabaseServiceClient();
+          const { error } = await supabase
+            .from("bh_branch_map")
+            .delete()
+            .eq("index", mapping.index);
+
+          if (error) {
+            setAlert(
+              "Error",
+              `Delete failed: ${error.message}`,
+              () => {},
+              false,
+            );
+            return;
+          }
+
+          await addActivityLogs(
+            `${userInfo?.email} ได้ทำการลบ Delivery Mapping\n- <b>Grab</b>: ${mapping.grab}\n- <b>Lineman</b>: ${mapping.lineman}\n- <b>Robinhood</b>: ${mapping.robinhood}\n- <b>ShopeeFood</b>: ${mapping.shopeefood}`,
+            "mapping",
+            shopId,
+          );
+
+          setAlert(
+            "Success",
+            "ลบสำเร็จ",
+            () => {
+              window.location.reload();
+            },
+            false,
+          );
+        } finally {
+          setFullLoading(false);
+        }
+      },
+      true,
+    );
+  };
+
   const fetchBranch = async (
     limit: number,
     offset: number | "",
-  ): Promise<PaginatedResponse<BranchMapping> | ErrorResponse> => {
+  ): Promise<PaginatedResponse<RowType> | ErrorResponse> => {
     const summaryData: BranchMapping[] = allBranchData;
     const startIndex = offset === "" ? 0 : offset;
     const endIndex = startIndex + limit;
-    const paginatedData = summaryData.slice(startIndex, endIndex);
+    const paginatedData: RowType[] = summaryData
+      .slice(startIndex, endIndex)
+      .map((item) => ({
+        ...item,
+        action: (
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(item);
+            }}
+            disabled={allBranchData.length <= 1}
+          >
+            <IconTrashFilled />
+          </Button>
+        ),
+      }));
     const nextOffset = endIndex < summaryData.length ? endIndex : -1;
 
     return {
@@ -129,11 +204,7 @@ export default function Page({ params }: PageProps) {
         "Success",
         "อัปเดตสำเร็จ",
         () => {
-          if (shopBR !== shopId) {
-            window.location.reload();
-          } else {
-            fetchAllBranchData();
-          }
+          window.location.reload();
         },
         false,
       );
@@ -179,19 +250,21 @@ export default function Page({ params }: PageProps) {
           />
         </div>
         {isDataLoaded && (
-          <DataTable
+          <DataTable<RowType>
             fetchData={fetchBranch}
             columns={[
               { key: "grab", label: "Grab" },
               { key: "lineman", label: "Lineman" },
               { key: "robinhood", label: "Robinhood" },
               { key: "shopeefood", label: "ShopeeFood" },
+              { key: "action", label: "Action" },
             ]}
             hideSearch
           />
         )}
         <div className="flex justify-end mt-4">
           <Button
+            type="button"
             onClick={() => {
               window.location.href = `/dashboard/shop/create?shop_br=${shopId}&shop_name=${shopName}`;
             }}
