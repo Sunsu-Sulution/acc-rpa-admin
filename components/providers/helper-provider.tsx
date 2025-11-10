@@ -77,14 +77,18 @@ export function HelperProvider({ children }: { children: ReactNode }) {
     () => {
       try {
         const storedUserInfo = getItem("user_info");
-        if (storedUserInfo) {
-          return JSON.parse(storedUserInfo);
+        if (!storedUserInfo) {
+          return undefined;
         }
+        if (typeof storedUserInfo === "string") {
+          return JSON.parse(storedUserInfo) as GetUserInfoResponse;
+        }
+        return storedUserInfo as GetUserInfoResponse;
       } catch (e) {
         console.log(e);
         localStorage.removeItem("user_info");
+        return undefined;
       }
-      return undefined;
     },
   );
 
