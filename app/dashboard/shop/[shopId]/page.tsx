@@ -7,7 +7,12 @@ import { useHelperContext } from "@/components/providers/helper-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { addActivityLogs, getSupabaseServiceClient } from "@/lib/database";
+import {
+  addActivityLogs,
+  deleteBranchMapping,
+  fetchBranchMappingsByShop,
+  updateBranchMapping,
+} from "@/lib/database";
 import { BranchMapping } from "@/types/database";
 import { ErrorResponse, PaginatedResponse } from "@/types/lark";
 import { IconTrashFilled } from "@tabler/icons-react";
@@ -31,35 +36,31 @@ export default function Page({ params }: PageProps) {
 
   const fetchAllBranchData = async () => {
     setFullLoading(true);
-    const supabase = getSupabaseServiceClient();
-    const { data, error: queryError } = await supabase
-      .from("bh_branch_map")
-      .select()
-      .eq("shop_br", shopId);
+    try {
+      const data = await fetchBranchMappingsByShop(shopId);
+      if (!data || data.length < 1) {
+        window.location.href = "/dashboard";
+        return;
+      }
 
-    if (queryError) {
+      setShopName(data[0].shop);
+      setOldShopName(data[0].shop);
+      setAllBranchData(data);
+      setIsDataLoaded(true);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setAlert(
         "Error",
-        `Database query failed: ${queryError.message}`,
+        `Database query failed: ${message}`,
         () => {
           window.location.reload();
         },
         false,
       );
+    } finally {
       setFullLoading(false);
-      return;
     }
-
-    if (data.length < 1) {
-      window.location.href = "/dashboard";
-      return;
-    }
-
-    setShopName(data[0].shop);
-    setOldShopName(data[0].shop);
-    setAllBranchData(data || []);
-    setIsDataLoaded(true);
-    setFullLoading(false);
   };
 
   const handleDelete = async (mapping: BranchMapping) => {
@@ -79,21 +80,7 @@ export default function Page({ params }: PageProps) {
       async () => {
         setFullLoading(true);
         try {
-          const supabase = getSupabaseServiceClient();
-          const { error } = await supabase
-            .from("bh_branch_map")
-            .delete()
-            .eq("index", mapping.index);
-
-          if (error) {
-            setAlert(
-              "Error",
-              `Delete failed: ${error.message}`,
-              () => {},
-              false,
-            );
-            return;
-          }
+          await deleteBranchMapping(mapping.index);
 
           await addActivityLogs(
             `${userInfo?.email} ได้ทำการลบ Delivery Mapping\n- <b>Grab</b>: ${mapping.grab}\n- <b>Lineman</b>: ${mapping.lineman}\n- <b>Robinhood</b>: ${mapping.robinhood}\n- <b>ShopeeFood</b>: ${mapping.shopeefood}`,
@@ -109,6 +96,10 @@ export default function Page({ params }: PageProps) {
             },
             false,
           );
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "Unknown error occurred";
+          setAlert("Error", `Delete failed: ${message}`, () => {}, false);
         } finally {
           setFullLoading(false);
         }
@@ -159,36 +150,31 @@ export default function Page({ params }: PageProps) {
     event.preventDefault();
     setFullLoading(true);
     try {
-      const supabase = getSupabaseServiceClient();
       if (shopBR !== shopId) {
-        const { data: dupData, error: dupError } = await supabase
-          .from("bh_branch_map")
-          .select("shop_br")
-          .eq("shop_br", shopBR)
-          .limit(1);
-
-        if (dupError) {
+        try {
+          const duplicate = await fetchBranchMappingsByShop(shopBR);
+          if (duplicate && duplicate.length > 0) {
+            setAlert("Error", "มี Shop BR นี้อยู่แล้วในระบบ", () => {}, false);
+            return;
+          }
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "Unknown error occurred";
           setAlert(
             "Error",
-            `Validation failed: ${dupError.message}`,
+            `Validation failed: ${message}`,
             () => {},
             false,
           );
           return;
         }
-
-        if (dupData && dupData.length > 0) {
-          setAlert("Error", "มี Shop BR นี้อยู่แล้วในระบบ", () => {}, false);
-          return;
-        }
       }
-      const { error } = await supabase
-        .from("bh_branch_map")
-        .update({ shop_br: shopBR, shop: shopName })
-        .eq("shop_br", shopId);
-
-      if (error) {
-        setAlert("Error", `Update failed: ${error.message}`, () => {}, false);
+      try {
+        await updateBranchMapping(shopId, shopBR, shopName);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        setAlert("Error", `Update failed: ${message}`, () => {}, false);
         return;
       }
 

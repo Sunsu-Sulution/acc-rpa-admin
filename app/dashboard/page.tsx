@@ -3,7 +3,7 @@
 
 import { DataTable } from "@/components/datatable/datatable";
 import { useHelperContext } from "@/components/providers/helper-provider";
-import { getSupabaseServiceClient } from "@/lib/database";
+import { fetchBranchMappings } from "@/lib/database";
 import { ErrorResponse, PaginatedResponse } from "@/types/lark";
 import { BranchMapping } from "@/types/database";
 import { useEffect, useState } from "react";
@@ -21,27 +21,24 @@ export default function Home() {
 
   const fetchAllBranchData = async () => {
     setFullLoading(true);
-    const supabase = getSupabaseServiceClient();
-    const { data, error: queryError } = await supabase
-      .from("bh_branch_map")
-      .select();
-
-    if (queryError) {
+    try {
+      const data = await fetchBranchMappings();
+      setAllBranchData(data || []);
+      setIsDataLoaded(true);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setAlert(
         "Error",
-        `Database query failed: ${queryError.message}`,
+        `Database query failed: ${message}`,
         () => {
           window.location.reload();
         },
         false,
       );
+    } finally {
       setFullLoading(false);
-      return;
     }
-
-    setAllBranchData(data || []);
-    setIsDataLoaded(true);
-    setFullLoading(false);
   };
 
   const fetchBranch = async (

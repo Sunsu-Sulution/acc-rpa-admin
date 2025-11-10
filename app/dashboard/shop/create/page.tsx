@@ -4,7 +4,7 @@ import { useHelperContext } from "@/components/providers/helper-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { addActivityLogs, getSupabaseServiceClient } from "@/lib/database";
+import { addActivityLogs, createBranchMapping } from "@/lib/database";
 import { FormEvent, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -56,28 +56,30 @@ export default function Page() {
     const grab = form?.grab?.value ?? "";
     const robinhood = form?.robinhood?.value ?? "";
 
-    const supabase = getSupabaseServiceClient();
-    const { error } = await supabase.from("bh_branch_map").insert({
-      shop: shopName,
-      shop_br: shopBR,
-      grab: grab,
-      shopeefood: shopeefood,
-      lineman: lineman,
-      line_edc: lineEDC,
-      robinhood: robinhood,
-      pre_shop: "BEARHOUSE (แบร์เฮาส์)",
-    });
-
-    if (error) {
+    try {
+      await createBranchMapping({
+        shop: shopName,
+        shop_br: shopBR,
+        grab: grab,
+        shopeefood: shopeefood,
+        lineman: lineman,
+        line_edc: lineEDC,
+        robinhood: robinhood,
+        pre_shop: "BEARHOUSE (แบร์เฮาส์)",
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setAlert(
         "Error",
-        `Database query failed: ${error.message}`,
+        `Database query failed: ${message}`,
         () => {
           //   window.location.reload();
         },
         false,
       );
       setFullLoading(false);
+      return;
     }
 
     await addActivityLogs(

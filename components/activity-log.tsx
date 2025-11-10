@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { getSupabaseServiceClient } from "@/lib/database";
+import { fetchActivityLogs } from "@/lib/database";
 import { useEffect, useState } from "react";
 import { useHelperContext } from "./providers/helper-provider";
 
@@ -24,28 +24,23 @@ export default function ActivityLog({ ref, refId }: ActivityLogProps) {
 
   const fetchActivityLog = async () => {
     setFullLoading(true);
-    const supabase = getSupabaseServiceClient();
-    const { data, error } = await supabase
-      .from("activity_logs")
-      .select()
-      .eq("ref_id", refId)
-      .eq("ref", ref)
-      .order("created_at", { ascending: false });
-
-    if (error) {
+    try {
+      const data = await fetchActivityLogs(ref, refId);
+      setActivityLogs(data || []);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setAlert(
         "Error",
-        `Database query failed: ${error.message}`,
+        `Database query failed: ${message}`,
         () => {
           window.location.href = "/dashboard";
         },
         false,
       );
-      return;
+    } finally {
+      setFullLoading(false);
     }
-
-    setActivityLogs(data || []);
-    setFullLoading(false);
   };
 
   useEffect(() => {
