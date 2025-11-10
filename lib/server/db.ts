@@ -25,7 +25,9 @@ const pool = new Pool({
     application_name: "acc-rpa-config",
 });
 
-export const query = async <T>(
+type QueryResultRow = Record<string, any>;
+
+export const query = async <T extends QueryResultRow>(
     textOrConfig: string | QueryConfig,
     values: unknown[] = [],
 ): Promise<QueryResult<T>> => {

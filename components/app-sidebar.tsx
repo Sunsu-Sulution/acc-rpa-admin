@@ -35,11 +35,6 @@ const data = {
       url: "/dashboard/logs",
       icon: IconBrandTablerFilled,
     },
-    {
-      name: "User History",
-      url: "/dashboard/user-history",
-      icon: IconGitBranch,
-    },
   ],
 };
 
