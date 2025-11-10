@@ -111,7 +111,7 @@ export function HelperProvider({ children }: { children: ReactNode }) {
         setTitle,
       },
     }),
-    [setAlert, setFullLoading, router, userInfo, title],
+    [setAlert, setFullLoading, router, userInfo?.user_id, title],
   );
 
   return (

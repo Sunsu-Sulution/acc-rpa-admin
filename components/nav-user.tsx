@@ -44,6 +44,10 @@ export function NavUser() {
     );
   };
 
+  if (userInfo?.user_id == "") {
+    return
+  }
+
   return (
     <SidebarMenu className="cursor-pointer">
       <SidebarMenuItem>
