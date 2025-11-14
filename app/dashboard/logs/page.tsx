@@ -95,6 +95,7 @@ export default async function Page() {
               <Table>
                 <TableHeader className="bg-muted/40">
                   <TableRow>
+                    <TableHead className="w-36">ID</TableHead>
                     <TableHead className="w-36">สถานะ</TableHead>
                     <TableHead>รายละเอียด</TableHead>
                     <TableHead className="w-64">Ref ID</TableHead>
@@ -124,6 +125,9 @@ export default async function Page() {
 
                       return (
                         <TableRow key={log.id} className="border-border/40">
+                          <TableCell className="font-medium">
+                            RPA{log.id}
+                          </TableCell>
                           <TableCell>
                             <div
                               className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${status.chipClassName}`}
