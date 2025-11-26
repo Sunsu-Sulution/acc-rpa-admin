@@ -35,6 +35,11 @@ const data = {
       url: "/dashboard/logs",
       icon: IconBrandTablerFilled,
     },
+    {
+      name: "Retry Job",
+      url: "/dashboard/retry-job",
+      icon: IconGitBranch,
+    },
   ],
 };
 
