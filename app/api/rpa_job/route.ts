@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     // Call external backend API
     const response = await axios.post(
-      "http://43.209.223.73:5000/api/rpa_job",
+      "http://43.209.21.130:5000/api/rpa_job",
       { date },
       {
         headers: {
